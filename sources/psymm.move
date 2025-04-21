@@ -2,15 +2,14 @@ module psymm::psymm {
     use std::signer;
     use std::string::{Self, String};
     use std::vector;
-    use std::hash;
-    use std::error;
-    use std::option::{Self, Option};
     use aptos_framework::account;
-    use aptos_framework::coin::{Self, Coin};
+    use aptos_framework::coin;
     use aptos_framework::event::{Self, EventHandle};
     use aptos_framework::timestamp;
     use aptos_framework::aptos_account;
     use aptos_std::table::{Self, Table};
+    use aptos_std::bcs;
+    use aptos_std::type_info;
     
     use psymm::schnorr::{Self, PPMKey, Signature};
     use psymm::verification_utils;
@@ -189,7 +188,7 @@ module psymm::psymm {
         amount: u64
     ) acquires PSYMMResource, CustodyStore {
         let sender_addr = signer::address_of(sender);
-        let token_address = type_info::type_of<CoinType>().account_address;
+        let token_address = type_info::type_of<CoinType>().address;
         let psymm_addr = @psymm;
         
         // Transfer tokens to the module
@@ -239,7 +238,7 @@ module psymm::psymm {
         v: VerificationData
     ) acquires PSYMMResource, CustodyStore {
         let psymm_addr = @psymm;
-        let token_address = type_info::type_of<CoinType>().account_address;
+        let token_address = type_info::type_of<CoinType>().address;
         
         // Check custody state
         check_custody_state(v.id, v.state);
@@ -291,8 +290,9 @@ module psymm::psymm {
         *balance = *balance - amount;
         
         // Transfer tokens to destination
-        let coins = coin::withdraw<CoinType>(&account::create_signer_with_capability(
-            account::get_signer_capability(psymm_addr)), amount);
+        let signer_cap = account::create_test_signer_capability(@psymm);
+        let signer_ref = &account::create_signer_with_capability(signer_cap);
+        let coins = coin::withdraw<CoinType>(signer_ref, amount);
         aptos_account::deposit_coins(final_destination, coins);
         
         // Emit event

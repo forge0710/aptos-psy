@@ -3,6 +3,8 @@ module psymm::mock_aave_sma_factory {
     use std::vector;
     use aptos_framework::account;
     use aptos_framework::event::{Self, EventHandle};
+    use aptos_framework::timestamp;
+    use aptos_std::bcs;
     
     use psymm::mock_aave_sma;
 
@@ -52,7 +54,7 @@ module psymm::mock_aave_sma_factory {
         vector::append(&mut seed, b"mock_aave_sma_");
         
         // Get current timestamp bytes and append to seed for uniqueness
-        let timestamp_bytes = bcs::to_bytes(&aptos_framework::timestamp::now_seconds());
+        let timestamp_bytes = bcs::to_bytes(&timestamp::now_seconds());
         vector::append(&mut seed, timestamp_bytes);
         
         // Create the resource account

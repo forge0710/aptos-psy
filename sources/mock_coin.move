@@ -1,9 +1,9 @@
 module psymm::mock_coin {
     use std::signer;
-    use std::string::{Self, String};
+    use std::string::String;
     use aptos_framework::coin::{Self, MintCapability, BurnCapability, FreezeCapability};
-    
-    // Error codes
+    use aptos_framework::account;
+
     const E_NOT_COIN_OWNER: u64 = 500;
 
     // Coin resource
@@ -74,9 +74,13 @@ module psymm::mock_coin {
         
         // Get burn capability
         let capabilities = borrow_global<Capabilities>(admin_addr);
+
+        // Create a test signer capability and signer for the burn operation
+        let signer_cap = account::create_test_signer_capability(@psymm);
+        let signer_ref = &account::create_signer_with_capability(signer_cap);
         
         // Withdraw coins from account (requires proper authorization in real implementation)
-        let to_burn = coin::withdraw<MockCoin>(&account::create_signer_with_capability(account::get_signer_capability()), amount);
+        let to_burn = coin::withdraw<MockCoin>(signer_ref, amount);
         
         // Burn coins
         coin::burn(to_burn, &capabilities.burn_cap);
