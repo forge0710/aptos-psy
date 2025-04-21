@@ -1,0 +1,16 @@
+[package]
+name = "Psymm"
+version = "0.0.1"
+authors = ["Max"]
+
+[addresses]
+psymm = "_"
+std = "0x1"
+aptos_std = "0x1"
+aptos_framework = "0x1"
+
+[dev-addresses]
+psymm = "0xcafe"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework", rev = "mainnet" }
